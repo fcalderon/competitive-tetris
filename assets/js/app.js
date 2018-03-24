@@ -11,7 +11,9 @@
 //
 // If you no longer want to use a dependency, remember
 // to also remove its path from "config.paths.watched".
-import "phoenix_html"
+import 'phoenix_html';
+import ReactDOM from 'react-dom';
+import React from 'react';
 
 // Import local files
 //
@@ -19,3 +21,11 @@ import "phoenix_html"
 // paths "./socket" or full ones "web/static/js/socket".
 
 // import socket from "./socket"
+import { Hello } from './hello.jsx';
+
+function init() {
+  let root = document.getElementById('competitive-tetris');
+  ReactDOM.render(<Hello name='Boiled Egg'/>, root);
+}
+
+$(init)
