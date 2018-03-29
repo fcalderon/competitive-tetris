@@ -182,7 +182,7 @@ defmodule Competitivetetris.Game do
     %{
       playerNumber: playerNumber,
       landed: get_blank_board(),
-      topLeft: %{ row: -4, col: 4},
+      topLeft: %{ row: 0, col: 4},
       currentTetrimonio:  shapeTetrimonio,
       tetrimonioLetter: randomShape,
       rotationIndex: 0
@@ -250,7 +250,13 @@ defmodule Competitivetetris.Game do
   defp cel_val(col, rowIndex, colIndex, topLeft, currentTetrimonio) do
     if (col == 0 && rowIndex >= topLeft.row && rowIndex < topLeft.row + 4
         && colIndex >= topLeft.col && colIndex < topLeft.col + 4) do
-      Enum.at(Enum.at(currentTetrimonio, (topLeft.row + 3) - rowIndex), (topLeft.col + 3) - colIndex)
+      tEl = Enum.at(Enum.at(currentTetrimonio, (topLeft.row + 3) - rowIndex), (topLeft.col + 3) - colIndex)
+      if (tEl != 0) do
+        tEl
+      else
+        col
+      end
+
     else
       col
     end
@@ -276,7 +282,7 @@ defmodule Competitivetetris.Game do
       newTetrimonioLetter = get_random_tetrimonio_letter()
       updated = Map.merge(updated, %{
         landed: get_visible_board(player.landed, player.currentTetrimonio, player.topLeft),
-        topLeft: %{row: -4, col: 4},
+        topLeft: %{row: 0, col: 4},
         currentTetrimonio: get_tetrimonio(newTetrimonioLetter, 0),
         tetrimonioLetter: newTetrimonioLetter,
         rotationIndex: 0
