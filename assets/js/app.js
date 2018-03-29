@@ -20,12 +20,39 @@ import React from 'react';
 // Local files can be imported directly using relative
 // paths "./socket" or full ones "web/static/js/socket".
 
-// import socket from "./socket"
+import socket from "./socket"
+
 import { Hello } from './hello.jsx';
 
-function init() {
-  let root = document.getElementById('competitive-tetris');
-  ReactDOM.render(<Hello name='Boiled Egg'/>, root);
+function handleInput(channel, joined, playerNumber) {
+    console.log('Button clicked', joined);
+    if (joined) {
+        channel.push('play', {"playerNumber": playerNumber})
+            .receive("ok", res => {
+                console.log("Got okay: ", res);
+            }).receive("error", res => {
+                console.error('Got error', res);
+        })
+    }
 }
 
-$(init)
+function init() {
+    let root = document.getElementById('competitive-tetris');
+    let playerNumber = localStorage.getItem("playerNumber");
+    if (!playerNumber) {
+        playerNumber = Math.floor(Math.random() * 100000);
+        localStorage.setItem("playerNumber", playerNumber)
+    }
+
+    let channel = socket.channel('games:demo', {"playerNumber": playerNumber});
+
+    let joined = false;
+
+    channel.join()
+        .receive("ok", res => { console.log(res); joined = true; })
+        .receive("error", res => { console.log("Got error", res) });
+
+    ReactDOM.render(<Hello name='Boiled Egg' buttonClicked={ () => { handleInput(channel, joined, playerNumber) }}/>, root);
+}
+
+$(init);

@@ -3,6 +3,7 @@ defmodule CompetitivetetrisWeb.UserSocket do
 
   ## Channels
   # channel "room:*", CompetitivetetrisWeb.RoomChannel
+  channel "games:*", CompetitivetetrisWeb.GamesChannel
 
   ## Transports
   transport :websocket, Phoenix.Transports.WebSocket

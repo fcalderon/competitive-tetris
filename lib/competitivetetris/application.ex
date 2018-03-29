@@ -9,11 +9,11 @@ defmodule Competitivetetris.Application do
     # Define workers and child supervisors to be supervised
     children = [
       # Start the Ecto repository
-      supervisor(Competitivetetris.Repo, []),
+#      supervisor(Competitivetetris.Repo, []),
       # Start the endpoint when the application starts
       supervisor(CompetitivetetrisWeb.Endpoint, []),
       # Start your own worker by calling: Competitivetetris.Worker.start_link(arg1, arg2, arg3)
-      # worker(Competitivetetris.Worker, [arg1, arg2, arg3]),
+       worker(Competitivetetris.GameBackup, []),
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
