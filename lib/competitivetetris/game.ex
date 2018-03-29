@@ -176,7 +176,7 @@ defmodule Competitivetetris.Game do
     ]
   ]
   end
-  defp new_player(playerNumber) do
+  def new_player(playerNumber) do
     randomShape = get_random_tetrimonio_letter()
     shapeTetrimonio = get_tetrimonio(randomShape, 0)
     %{
@@ -232,7 +232,7 @@ defmodule Competitivetetris.Game do
     }
   end
 
-  defp get_visible_board(landed, currentTetrimonio, topLeft) do
+  def get_visible_board(landed, currentTetrimonio, topLeft) do
     visible = landed
     |> Enum.with_index
     |> Enum.map(
@@ -247,16 +247,15 @@ defmodule Competitivetetris.Game do
     visible
   end
 
-  defp cel_val(col, rowIndex, colIndex, topLeft, currentTetrimonio) do
+  def cel_val(col, rowIndex, colIndex, topLeft, currentTetrimonio) do
     if (col == 0 && rowIndex >= topLeft.row && rowIndex < topLeft.row + 4
         && colIndex >= topLeft.col && colIndex < topLeft.col + 4) do
-      tEl = Enum.at(Enum.at(currentTetrimonio, (topLeft.row + 3) - rowIndex), (topLeft.col + 3) - colIndex)
+      tEl = get_val_at(currentTetrimonio, rowIndex - topLeft.row, colIndex - topLeft.col)
       if (tEl != 0) do
         tEl
       else
         col
       end
-
     else
       col
     end
@@ -385,6 +384,11 @@ defmodule Competitivetetris.Game do
 
   def get_random_tetrimonio_letter() do
     Enum.random([:I, :O, :J, :Z, :T, :L])
+  end
+
+
+  def get_val_at(biDimensionalArray, row, col) do
+    Enum.at(Enum.at(biDimensionalArray, row), col)
   end
 
 end

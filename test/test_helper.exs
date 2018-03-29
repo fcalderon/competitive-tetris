@@ -1,4 +1,4 @@
 ExUnit.start()
 
-Ecto.Adapters.SQL.Sandbox.mode(Competitivetetris.Repo, :manual)
+#Ecto.Adapters.SQL.Sandbox.mode(Competitivetetris.Repo, :manual)
 
