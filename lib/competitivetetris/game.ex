@@ -304,9 +304,9 @@ defmodule Competitivetetris.Game do
            |> Enum.with_index
            |> Enum.any?(
                 fn({col, colIndex}) ->
-                  col != 0 && ((rowIndex + potentialNext.row >= length(player.landed))
+                  col != 0 && (((rowIndex + potentialNext.row >= length(player.landed))
                                || ((Enum.at(Enum.at(landed, rowIndex + potentialNext.row),
-                                      colIndex + potentialNext.col)) != 0))
+                                      colIndex + potentialNext.col)) != 0)) || colIndex + potentialNext.col < 0)
                 end)
          end)
   end
@@ -319,17 +319,18 @@ defmodule Competitivetetris.Game do
     updated = player
 
     if (player.playerNumber == playerNumber) do
+      potentialPlayer = player
       case { move } do
         {"move_left"} ->
-          updated = Map.put(updated, :topLeft, %{ row: player.topLeft.row, col: player.topLeft.col - 1})
+          potentialPlayer = Map.put(updated, :topLeft, %{ row: player.topLeft.row, col: player.topLeft.col - 1})
         {"move_right"} ->
-          updated = Map.put(updated, :topLeft, %{ row: player.topLeft.row, col: player.topLeft.col + 1})
+          potentialPlayer = Map.put(updated, :topLeft, %{ row: player.topLeft.row, col: player.topLeft.col + 1})
         {"rotate"} ->
           rotationIndex = player.rotationIndex + 1
           if (rotationIndex > 3) do
             rotationIndex = 0
           end
-          updated = Map.merge(updated,
+          potentialPlayer = Map.merge(updated,
             %{
               rotationIndex: rotationIndex,
               currentTetrimonio: get_tetrimonio(player.tetrimonioLetter, rotationIndex)
@@ -339,9 +340,14 @@ defmodule Competitivetetris.Game do
         {"hard_drop"} ->
           IO.puts("Hard drop")
       end
+      if (!will_collide(potentialPlayer, potentialPlayer.topLeft)) do
+        potentialPlayer
+      else
+        player
+      end
+    else
+      player
     end
-
-    updated
   end
 
   def get_blank_board() do
