@@ -133,11 +133,6 @@ export class Game extends React.Component {
 
     render() {
         return (<div className={'container mb-5'}>
-            <div className={'row'}>
-                <div className={'col'}>One Col</div>
-                <div className={'col'}>Two Col</div>
-                <div className={'col'}>Three Col6</div>
-            </div>
             <div>
                 { !!this.state.game ?
                     <div className={'row'}>

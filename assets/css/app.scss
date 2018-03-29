@@ -6,10 +6,18 @@ body { font-size: 20pt; }
   border: solid 1px black;
 }
 
+.board .row {
+  height: 35px;
+  padding: 0;
+
+}
+
 .cell {
   height: 35px;
-  width: 35px;
+  width: 35px !important;
   border: solid 0.5px black;
+  padding: 0;
+
 }
 
 .blank {

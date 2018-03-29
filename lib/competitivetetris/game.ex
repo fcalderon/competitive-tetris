@@ -397,4 +397,43 @@ defmodule Competitivetetris.Game do
     Enum.at(Enum.at(biDimensionalArray, row), col)
   end
 
+  def get_completed_rows(board) do
+    board
+    |> Enum.with_index
+    |> Enum.reduce([],
+         fn({row, rowIndex}, acc) ->
+           completed =
+             row
+             |> Enum.all?(
+                  fn(col) ->
+                    col != 0 && col != 10 # this is the number used for solid rows (those posed by opponents)
+                  end)
+           if (completed) do
+             Enum.concat(acc, [rowIndex])
+           else
+             acc
+           end
+         end)
+  end
+
+  def clear_rows(rowsToClear, board) do
+    board
+    |> Enum.with_index
+    |> Enum.reduce([],
+         fn({row, rowIndex}, acc) ->
+           if (Enum.any?(rowsToClear, fn(x) -> x == rowIndex end)) do
+             Enum.concat(acc, [[0,0,0,0,0,0,0,0,0,0]])
+           else
+             Enum.concat(acc, [row])
+           end
+         end)
+  end
+
+  def clear_completed_rows(board) do
+    board
+    |> get_completed_rows
+    |> clear_rows(board)
+  end
+
+
 end
