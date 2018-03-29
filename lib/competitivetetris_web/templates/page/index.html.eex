@@ -1,6 +1,6 @@
 <div class="jumbotron">
-  <h2><%= gettext "Welcome to %{name}!", name: "Phoenix" %></h2>
-  <p class="lead">A productive web framework that<br />does not compromise speed and maintainability.</p>
+  <h2><%= gettext "Welcome to %{name}!", name: "Competitive Tetris" %></h2>
+  <p class="lead">Challenge your friends to a game of Tetris!</p>
 </div>
 
 <div id="competitive-tetris"></div>

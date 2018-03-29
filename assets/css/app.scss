@@ -1,0 +1,9 @@
+@import "bootstrap";
+
+body { font-size: 20pt; }
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 80%;
+  }
+}

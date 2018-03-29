@@ -14,7 +14,7 @@ defmodule CompetitivetetrisWeb.GamesChannel do
              |> assign(:name, name)
              |> assign(:playerNumber, playerNumber)
 
-    :timer.send_interval(500, {:update_board, name, playerNumber})
+    :timer.send_interval(1000, {:update_board, name, playerNumber})
 
     send(self, {:player_joined, playerNumber, game})
 
@@ -28,7 +28,10 @@ defmodule CompetitivetetrisWeb.GamesChannel do
   end
 
   def handle_info({:update_board, name, playerNumber}, socket) do
-    push socket, "game:update_board", %{user: "SYSTEM", body: "ping", game: Game.client_view(GameBackup.load(name), playerNumber)}
+    newGame = Game.progress_board(GameBackup.load(name))
+    GameBackup.save(name, newGame)
+    push socket, "game:update_board", %{user: "SYSTEM", body: "ping", game: Game.client_view(newGame, playerNumber)}
+
     {:noreply, socket}
   end
 
@@ -50,8 +53,8 @@ defmodule CompetitivetetrisWeb.GamesChannel do
     :ok
   end
 
-  def handle_in("play", %{"playerNumber" => playerNumber}, socket) do
-    game = Game.play(GameBackup.load(socket.assigns[:name]), playerNumber)
+  def handle_in("play", %{"playerNumber" => playerNumber, "move" => move}, socket) do
+    game = Game.play(GameBackup.load(socket.assigns[:name]), playerNumber, move)
 
     GameBackup.save(socket.assigns[:name], game)
 
