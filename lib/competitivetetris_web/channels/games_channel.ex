@@ -5,19 +5,38 @@ defmodule CompetitivetetrisWeb.GamesChannel do
 
   def join("games:" <> name, %{"playerNumber" => playerNumber}, socket) do
     game = GameBackup.load(name) || Game.new(playerNumber)
+
     game = Game.join(game, playerNumber)
-    GameBackup.save(socket.assigns[:name], game)
-    IO.puts("Someone joined")
-    IO.inspect(name)
-    IO.inspect(playerNumber)
-    IO.inspect(socket)
+
+    GameBackup.save(name, game)
+
     socket = socket
              |> assign(:name, name)
              |> assign(:playerNumber, playerNumber)
-             |> assign(:game, game)
-    IO.puts("Joined! Replying with client view:")
-    IO.inspect(Game.client_view(game, playerNumber))
+
+    :timer.send_interval(500, {:update_board, name, playerNumber})
+
+    send(self, {:player_joined, playerNumber, game})
+
     {:ok, %{"join" => name, "game" => Game.client_view(game, playerNumber)}, socket}
+  end
+
+  def handle_info({:player_joined, playerNumber, game}, socket) do
+    broadcast! socket, "game:player_joined", %{playerNumber: playerNumber}
+    push socket, "join", %{status: "connected"}
+    {:noreply, socket}
+  end
+
+  def handle_info({:update_board, name, playerNumber}, socket) do
+    push socket, "game:update_board", %{user: "SYSTEM", body: "ping", game: Game.client_view(GameBackup.load(name), playerNumber)}
+    {:noreply, socket}
+  end
+
+
+  def handle_info({:player_played, game}, socket) do
+    playerNumber = socket.assigns[:playerNumber]
+    broadcast! socket, "game:player_played", %{"game" => Game.client_view(game, playerNumber)}
+    {:noreply, socket}
   end
 
   def handle_in("reset", payload, socket) do
@@ -25,24 +44,21 @@ defmodule CompetitivetetrisWeb.GamesChannel do
     {:reply, {:ok, %{"game" => "reset received"}}, socket}
   end
 
+
+  def terminate(reason, _socket) do
+    broadcast! _socket, "game:player_left", %{playerNumber: _socket.assigns[:playerNumber]}
+    :ok
+  end
+
   def handle_in("play", %{"playerNumber" => playerNumber}, socket) do
-    IO.puts("Got play")
-
-    game = Game.play(socket.assigns[:game], playerNumber)
-
-    IO.puts("Played! Saving backup!")
+    game = Game.play(GameBackup.load(socket.assigns[:name]), playerNumber)
 
     GameBackup.save(socket.assigns[:name], game)
 
-    IO.puts("Saved backup! Assigning game to socket")
-    socket = assign(socket, :game, game)
-
-    IO.inspect(game)
-
-    IO.puts("Assigned game to socket! Replying with OK!")
-    IO.inspect(Game.client_view(game, playerNumber))
-    IO.inspect({:ok, %{"game" => Game.client_view(game, playerNumber)}})
-    IO.puts("Replying")
+    send(self, {:player_played, game})
     {:reply, {:ok, %{"game" => Game.client_view(game, playerNumber)}}, socket}
   end
 end
+
+# Helpful how to
+# https://github.com/chrismccord/phoenix_chat_example
