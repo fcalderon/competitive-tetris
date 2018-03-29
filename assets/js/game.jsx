@@ -94,25 +94,45 @@ export class Game extends React.Component {
             return <p>N/A</p>
         }
 
-        return board.map((row, index) => {
+        return (<div className={'board'}> {board.map((row, index) => {
            return (
                <div className={'row'} key={index}>
 
                    {row.map((col, colIndex) => {
                        return (
-                           <div className={'col-xs-1'} key={colIndex}>
-                               {col}
+                           <div className={'col cell ' + this._cellClass(col)} key={colIndex}>
+
                            </div>
                        )
                    })}
 
                </div>
            )
-        });
+        })}</div>);
+    }
+
+    _cellClass(val) {
+        switch (val) {
+            case 1:
+                return 'I';
+            case 2:
+                return 'O';
+            case 3:
+                return 'J';
+            case 4:
+                return 'Z';
+            case 5:
+                return 'T';
+            case 6:
+                return 'L';
+            default:
+                return 'blank';
+
+        }
     }
 
     render() {
-        return (<div className={'container'}>
+        return (<div className={'container mb-5'}>
             <div className={'row'}>
                 <div className={'col'}>One Col</div>
                 <div className={'col'}>Two Col</div>

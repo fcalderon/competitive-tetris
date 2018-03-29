@@ -2,6 +2,37 @@
 
 body { font-size: 20pt; }
 
+.board {
+  border: solid 1px black;
+}
+
+.cell {
+  height: 35px;
+  width: 35px;
+  border: solid 0.5px black;
+}
+
+.blank {
+  background-color: gray;
+}
+.I {
+  background-color: red;
+}
+.O {
+  background-color: cyan;
+}
+.J {
+  background-color: magenta;
+}
+.Z {
+  background-color: green;
+}
+.T {
+  background-color: silver;
+}
+.L {
+  background-color: yellow;
+}
 @media (min-width: 768px) {
   .container {
     max-width: 80%;

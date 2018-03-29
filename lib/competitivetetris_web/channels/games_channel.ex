@@ -14,7 +14,7 @@ defmodule CompetitivetetrisWeb.GamesChannel do
              |> assign(:name, name)
              |> assign(:playerNumber, playerNumber)
 
-    :timer.send_interval(1000, {:update_board, name, playerNumber})
+    :timer.send_interval(500, {:update_board, name, playerNumber})
 
     send(self, {:player_joined, playerNumber, game})
 

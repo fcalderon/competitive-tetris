@@ -15,16 +15,16 @@ defmodule Competitivetetris.Game do
 
       ],
       [
+        [0,0,1,0],
+        [0,0,1,0],
+        [0,0,1,0],
+        [0,0,1,0],
+      ],
+      [
         [0,0,0,0],
         [1,1,1,1],
         [0,0,0,0],
         [0,0,0,0],
-      ],
-      [
-        [0,0,1,0],
-        [0,0,1,0],
-        [0,0,1,0],
-        [0,0,1,0],
       ]
     ]
   end
@@ -182,7 +182,6 @@ defmodule Competitivetetris.Game do
     %{
       playerNumber: playerNumber,
       landed: get_blank_board(),
-      visibleBoard: get_blank_board(),
       topLeft: %{ row: -4, col: 4},
       currentTetrimonio:  shapeTetrimonio,
       tetrimonioLetter: randomShape,
@@ -236,22 +235,21 @@ defmodule Competitivetetris.Game do
   defp get_visible_board(landed, currentTetrimonio, topLeft) do
     visible = landed
     |> Enum.with_index
-    |> Enum.map( fn({row, rowIndex}) -> row |> Enum.with_index |> Enum.map(fn({col, colIndex}) -> cel_val(col, rowIndex, colIndex, topLeft, currentTetrimonio) end) end)
-
-    IO.puts("Visible board for player:")
-    IO.inspect(topLeft)
-    IO.inspect(visible)
-
+    |> Enum.map(
+         fn({row, rowIndex})
+         -> row
+            |> Enum.with_index
+            |> Enum.map(
+                 fn({col, colIndex})
+                 -> cel_val(col, rowIndex, colIndex, topLeft, currentTetrimonio)
+                 end)
+         end)
     visible
   end
 
   defp cel_val(col, rowIndex, colIndex, topLeft, currentTetrimonio) do
-#    IO.puts("Drawing tetrimonio")
-#    IO.inspect(currentTetrimonio)
-#    IO.inspect(%{ rowIndex: rowIndex, colIndex: colIndex})
-#    IO.inspect(topLeft)
-    if (rowIndex >= topLeft.row && rowIndex <= topLeft.row + 4
-        && colIndex >= topLeft.col && colIndex <= topLeft.col + 4) do
+    if (col == 0 && rowIndex >= topLeft.row && rowIndex < topLeft.row + 4
+        && colIndex >= topLeft.col && colIndex < topLeft.col + 4) do
       Enum.at(Enum.at(currentTetrimonio, (topLeft.row + 3) - rowIndex), (topLeft.col + 3) - colIndex)
     else
       col
@@ -264,11 +262,48 @@ defmodule Competitivetetris.Game do
 
   def progress_player(player) do
     updated = player
-    # TODO check for conlisions
     # Increase row
-    updated = Map.put(updated, :topLeft, %{ row: player.topLeft.row + 1, col: player.topLeft.col })
 
-    updated
+    nextMove = %{ row: player.topLeft.row + 1, col: player.topLeft.col }
+
+    willCollide = will_collide(player, nextMove)
+
+    IO.puts("Will collide?")
+    IO.inspect(willCollide)
+
+    if (willCollide) do
+      IO.puts("Willllll Collide!!!")
+      newTetrimonioLetter = get_random_tetrimonio_letter()
+      updated = Map.merge(updated, %{
+        landed: get_visible_board(player.landed, player.currentTetrimonio, player.topLeft),
+        topLeft: %{row: -4, col: 4},
+        currentTetrimonio: get_tetrimonio(newTetrimonioLetter, 0),
+        tetrimonioLetter: newTetrimonioLetter,
+        rotationIndex: 0
+      })
+      IO.inspect(updated)
+      updated
+    else
+      Map.put(updated, :topLeft, nextMove)
+    end
+  end
+
+  def will_collide(player, potentialNext) do
+    landed = player.landed
+    tetrimonio = player.currentTetrimonio
+    tetrimonio
+    |> Enum.with_index
+    |> Enum.any?(
+         fn({row, rowIndex}) ->
+           row
+           |> Enum.with_index
+           |> Enum.any?(
+                fn({col, colIndex}) ->
+                  col != 0 && ((rowIndex + potentialNext.row >= length(player.landed))
+                               || ((Enum.at(Enum.at(landed, rowIndex + potentialNext.row),
+                                      colIndex + potentialNext.col)) != 0))
+                end)
+         end)
   end
 
   def play(game, playerNumber, move) do
@@ -289,8 +324,11 @@ defmodule Competitivetetris.Game do
           if (rotationIndex > 3) do
             rotationIndex = 0
           end
-          updated = Map.put(updated, :rotationIndex, rotationIndex, :currentTetrimonio,
-            get_tetrimonio(player.tetrimonioLetter, rotationIndex))
+          updated = Map.merge(updated,
+            %{
+              rotationIndex: rotationIndex,
+              currentTetrimonio: get_tetrimonio(player.tetrimonioLetter, rotationIndex)
+            })
         {"soft_drop"} ->
           IO.puts("Soft drop")
         {"hard_drop"} ->
