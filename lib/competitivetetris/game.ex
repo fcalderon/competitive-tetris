@@ -277,10 +277,11 @@ defmodule Competitivetetris.Game do
     IO.inspect(willCollide)
 
     if (willCollide) do
+      newBoard = get_visible_board(player.landed, player.currentTetrimonio, player.topLeft)
       IO.puts("Willllll Collide!!!")
       newTetrimonioLetter = get_random_tetrimonio_letter()
       updated = Map.merge(updated, %{
-        landed: get_visible_board(player.landed, player.currentTetrimonio, player.topLeft),
+        landed: clear_completed_rows(newBoard),
         topLeft: %{row: 0, col: 4},
         currentTetrimonio: get_tetrimonio(newTetrimonioLetter, 0),
         tetrimonioLetter: newTetrimonioLetter,
