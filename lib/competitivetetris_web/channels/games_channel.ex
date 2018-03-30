@@ -35,9 +35,14 @@ defmodule CompetitivetetrisWeb.GamesChannel do
     game = GameBackup.load(name)
 
     if (game.gameStarted) do
-      newGame = Game.progress_board(game)
-      GameBackup.save(name, newGame)
-      push socket, "game:update_board", %{user: "SYSTEM", body: "ping", game: Game.client_view(newGame, playerNumber)}
+      if (!game.gameEnded) do
+        newGame = Game.progress_board(game)
+        GameBackup.save(name, newGame)
+        push socket, "game:update_board", %{user: "SYSTEM", body: "ping", game: Game.client_view(newGame, playerNumber)}
+      else
+        push socket, "game:game_ended", %{user: "SYSTEM", body: "ping", game: Game.client_view(game, playerNumber)}
+      end
+
     else
       push socket, "game:update_board", %{user: "SYSTEM", body: "ping", game: Game.client_view(game, playerNumber)}
     end

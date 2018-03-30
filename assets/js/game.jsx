@@ -7,11 +7,13 @@ export class Game extends React.Component {
         this.state = { game: undefined };
         this.channel = props.channel;
         this.playerNumber = props.playerNumber;
+        this.notified = false;
         this.channel.join()
             .receive("ok", res => { console.log('>>> JOINED',res); })
             .receive("error", res => { console.log("Got error", res) });
         this.channel.on("game:player_joined", res => { this._handlePlayerJoined(res); });
         this.channel.on("game:update_board", res => { this._handleBoardUpdate(res); });
+        this.channel.on("game:game_ended", res => { this._handleGameEnded(res); });
         this.channel.on("game:player_left", res => { this._handlePlayerLeft(res); });
         this.channel.on("game:player_played", res => { this._handlePlayerPlayed(res); });
     }
@@ -27,6 +29,22 @@ export class Game extends React.Component {
     _handleBoardUpdate(res) {
         console.log('Board update:', res);
         this._onGameUpdated(res.game)
+    }
+
+    _handleGameEnded(res) {
+        console.log('Game ended:', res);
+        const game = res.game;
+        if (!this.notified) {
+            if (game.winner == this.playerNumber) {
+                alert('You won!');
+                this.notified = true;
+            } else {
+                alert('You lost.');
+                this.notified = true;
+            }
+        }
+
+        this._onGameUpdated(game)
     }
 
     _handlePlayerPlayed(res) {

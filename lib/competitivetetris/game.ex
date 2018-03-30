@@ -186,7 +186,8 @@ defmodule Competitivetetris.Game do
       currentTetrimonio:  shapeTetrimonio,
       tetrimonioLetter: randomShape,
       rotationIndex: 0,
-      numberOfRowsCompleted: 0
+      numberOfRowsCompleted: 0,
+      boardFilled: false
     }
   end
 
@@ -196,6 +197,7 @@ defmodule Competitivetetris.Game do
     %{
       gameStarted: false,
       gameEnded: false,
+      winner: nil,
       players: [
         new_player(playerNumber)
       ],
@@ -223,6 +225,8 @@ defmodule Competitivetetris.Game do
   def client_view(game, playerNumber) do
     %{
       gameStarted: game.gameStarted,
+      gameEnded: game.gameEnded,
+      winner: game.winner,
       lastPlay: playerNumber,
       players: Enum.map(game.players, fn(p) -> get_player_client_view(p) end),
     }
@@ -267,12 +271,19 @@ defmodule Competitivetetris.Game do
   def progress_board(game) do
     updatedGame = Map.put(game, :players, Enum.map(game.players, fn(player) -> progress_player(player) end))
     updatedPlayers = updatedGame.players
-    Map.put(updatedGame, :players,
+    updatedGame = Map.put(updatedGame, :players,
       Enum.reduce(updatedGame.players,
         updatedPlayers,
         fn(player, acc) ->
           Enum.map(acc, fn(mapPlayer) -> update_solid_rows(mapPlayer, player) end)
         end))
+    gameEnded = Enum.any?(updatedGame.players, fn(player) -> player.boardFilled end)
+    if (gameEnded) do
+      updatedGame = Map.put(updatedGame, :winner, Enum.find(updatedGame.players, fn(player) -> !player.boardFilled end).playerNumber)
+      updatedGame = Map.put(updatedGame, :gameEnded, true)
+    else
+      updatedGame
+    end
   end
 
   def update_solid_rows(playerToUpdate, otherPlayer) do
@@ -303,11 +314,12 @@ defmodule Competitivetetris.Game do
         currentTetrimonio: get_tetrimonio(newTetrimonioLetter, 0),
         tetrimonioLetter: newTetrimonioLetter,
         rotationIndex: 0,
-        numberOfRowsCompleted: numberOfRowsCompleted
+        numberOfRowsCompleted: numberOfRowsCompleted,
+        boardFilled: false
       })
-      updated
+      Map.put(updated, :boardFilled, board_filled(updated.landed))
     else
-      Map.put(updated, :topLeft, nextMove)
+      Map.merge(updated, %{ topLeft: nextMove, boardFilled: board_filled(updated.landed)})
     end
   end
 
@@ -489,5 +501,12 @@ defmodule Competitivetetris.Game do
 
   def add_solid_row(board, rowToReplace) do
     Enum.concat(List.delete_at(board, rowToReplace), [[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]])
+  end
+
+  def board_filled(board) do
+    Enum.any?(Enum.at(board, 0),
+      fn(cell) ->
+        cell != 0
+      end)
   end
 end
