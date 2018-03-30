@@ -185,7 +185,8 @@ defmodule Competitivetetris.Game do
       topLeft: %{ row: 0, col: 4},
       currentTetrimonio:  shapeTetrimonio,
       tetrimonioLetter: randomShape,
-      rotationIndex: 0
+      rotationIndex: 0,
+      numberOfRowsCompleted: 0
     }
   end
 
@@ -261,7 +262,24 @@ defmodule Competitivetetris.Game do
   end
 
   def progress_board(game) do
-    Map.put(game, :players, Enum.map(game.players, fn(player) -> progress_player(player) end))
+    updatedGame = Map.put(game, :players, Enum.map(game.players, fn(player) -> progress_player(player) end))
+    updatedPlayers = updatedGame.players
+    Map.put(updatedGame, :players,
+      Enum.reduce(updatedGame.players,
+        updatedPlayers,
+        fn(player, acc) ->
+          Enum.map(acc, fn(mapPlayer) -> update_solid_rows(mapPlayer, player) end)
+        end))
+  end
+
+  def update_solid_rows(playerToUpdate, otherPlayer) do
+    if (playerToUpdate.playerNumber == otherPlayer.playerNumber) do
+      playerToUpdate
+    else
+      Map.merge(playerToUpdate, %{
+        landed: set_solid_rows(playerToUpdate.landed, otherPlayer.numberOfRowsCompleted)
+      })
+    end
   end
 
   def progress_player(player) do
@@ -272,19 +290,17 @@ defmodule Competitivetetris.Game do
 
     willCollide = will_collide(player, nextMove)
 
-    IO.puts("Will collide?")
-    IO.inspect(willCollide)
-
     if (willCollide) do
       newBoard = get_visible_board(player.landed, player.currentTetrimonio, player.topLeft)
-      IO.puts("Willllll Collide!!!")
       newTetrimonioLetter = get_random_tetrimonio_letter()
+      numberOfRowsCompleted = updated.numberOfRowsCompleted + length(get_completed_rows(newBoard))
       updated = Map.merge(updated, %{
         landed: clear_completed_rows(newBoard),
         topLeft: %{row: 0, col: 4},
         currentTetrimonio: get_tetrimonio(newTetrimonioLetter, 0),
         tetrimonioLetter: newTetrimonioLetter,
-        rotationIndex: 0
+        rotationIndex: 0,
+        numberOfRowsCompleted: numberOfRowsCompleted
       })
       updated
     else
@@ -405,7 +421,7 @@ defmodule Competitivetetris.Game do
              row
              |> Enum.all?(
                   fn(col) ->
-                    col != 0 && col != 10 # this is the number used for solid rows (those posed by opponents)
+                    col != 0 && col != -1 # this is the number used for solid rows (those posed by opponents)
                   end)
            if (completed) do
              Enum.concat(acc, [rowIndex])
@@ -452,5 +468,23 @@ defmodule Competitivetetris.Game do
 
   def has_floating_rows(board) do
     true
+  end
+
+  def set_solid_rows(board, numberOfSolidRows) do
+    if (numberOfSolidRows == 0) do
+      board
+    else
+      lastRow = length(board) - 1
+      0..numberOfSolidRows - 1
+      |> Enum.reduce(board,
+           fn(rowIndex, acc) ->
+             add_solid_row(acc, lastRow - rowIndex)
+           end)
+    end
+
+  end
+
+  def add_solid_row(board, rowToReplace) do
+    Enum.concat(List.delete_at(board, rowToReplace), [[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]])
   end
 end

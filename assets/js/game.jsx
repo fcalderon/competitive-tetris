@@ -125,6 +125,8 @@ export class Game extends React.Component {
                 return 'T';
             case 6:
                 return 'L';
+            case -1:
+                return 'SOLID';
             default:
                 return 'blank';
 

@@ -41,6 +41,10 @@ body { font-size: 20pt; }
 .L {
   background-color: yellow;
 }
+
+.SOLID {
+  background-color: black;
+}
 @media (min-width: 768px) {
   .container {
     max-width: 80%;
