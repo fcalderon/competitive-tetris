@@ -6,19 +6,23 @@ defmodule CompetitivetetrisWeb.GamesChannel do
   def join("games:" <> name, %{"playerNumber" => playerNumber}, socket) do
     game = GameBackup.load(name) || Game.new(playerNumber)
 
-    game = Game.join(game, playerNumber)
+    if (game.gameStarted) do
+      {:error, %{"join" => name, "reason" => "game already started"}}
+    else
+      game = Game.join(game, playerNumber)
 
-    GameBackup.save(name, game)
+      GameBackup.save(name, game)
 
-    socket = socket
-             |> assign(:name, name)
-             |> assign(:playerNumber, playerNumber)
+      socket = socket
+               |> assign(:name, name)
+               |> assign(:playerNumber, playerNumber)
 
-    :timer.send_interval(500, {:update_board, name, playerNumber})
+      :timer.send_interval(500, {:update_board, name, playerNumber})
 
-    send(self, {:player_joined, playerNumber, game})
+      send(self, {:player_joined, playerNumber, game})
 
-    {:ok, %{"join" => name, "game" => Game.client_view(game, playerNumber)}, socket}
+      {:ok, %{"join" => name, "game" => Game.client_view(game, playerNumber)}, socket}
+    end
   end
 
   def handle_info({:player_joined, playerNumber, game}, socket) do
@@ -28,9 +32,15 @@ defmodule CompetitivetetrisWeb.GamesChannel do
   end
 
   def handle_info({:update_board, name, playerNumber}, socket) do
-    newGame = Game.progress_board(GameBackup.load(name))
-    GameBackup.save(name, newGame)
-    push socket, "game:update_board", %{user: "SYSTEM", body: "ping", game: Game.client_view(newGame, playerNumber)}
+    game = GameBackup.load(name)
+
+    if (game.gameStarted) do
+      newGame = Game.progress_board(game)
+      GameBackup.save(name, newGame)
+      push socket, "game:update_board", %{user: "SYSTEM", body: "ping", game: Game.client_view(newGame, playerNumber)}
+    else
+      push socket, "game:update_board", %{user: "SYSTEM", body: "ping", game: Game.client_view(game, playerNumber)}
+    end
 
     {:noreply, socket}
   end
@@ -54,11 +64,14 @@ defmodule CompetitivetetrisWeb.GamesChannel do
   end
 
   def handle_in("play", %{"playerNumber" => playerNumber, "move" => move}, socket) do
-    game = Game.play(GameBackup.load(socket.assigns[:name]), playerNumber, move)
+    game = GameBackup.load(socket.assigns[:name])
+    if (game.gameStarted) do
+      game = Game.play(game, playerNumber, move)
 
-    GameBackup.save(socket.assigns[:name], game)
+      GameBackup.save(socket.assigns[:name], game)
 
-    send(self, {:player_played, game})
+      send(self, {:player_played, game})
+    end
     {:reply, {:ok, %{"game" => Game.client_view(game, playerNumber)}}, socket}
   end
 end

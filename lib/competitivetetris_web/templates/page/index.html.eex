@@ -3,4 +3,15 @@
   <p class="lead">Challenge your friends to a game of Tetris!</p>
 </div>
 
-<div id="competitive-tetris"></div>
+<div>
+<h1>Enter name of a game session</h1>
+<form action="/game">
+    <div class="form-group">
+        <label for="gameName">Game name</label>
+        <input id="gameName" name="gameName" placeholder="Name" class="form-control">
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+
+</form>
+</div>

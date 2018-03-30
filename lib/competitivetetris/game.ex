@@ -194,19 +194,23 @@ defmodule Competitivetetris.Game do
     randomShape = get_random_tetrimonio_letter()
     shapeTetrimonio = get_tetrimonio(randomShape, 0)
     %{
-      currentShape: randomShape,
-      currentTetrimonio: shapeTetrimonio,
+      gameStarted: false,
       players: [
         new_player(playerNumber)
       ],
     }
   end
 
+  def start_game(game) do
+    Map.put(game, :gameStarted, true)
+  end
+
   def join(game, playerNumber) do
     if Enum.any?(game.players, fn(player) -> player.playerNumber == playerNumber end) do
       game
     else
-      Map.put(game, :players, Enum.concat(game.players, [new_player(playerNumber)]))
+      updatedGame = Map.put(game, :players, Enum.concat(game.players, [new_player(playerNumber)]))
+      Map.put(updatedGame, :gameStarted, length(updatedGame.players) == 2)
     end
   end
 
@@ -217,8 +221,7 @@ defmodule Competitivetetris.Game do
 
   def client_view(game, playerNumber) do
     %{
-      currentShape: game.currentShape,
-      currentTetrimonio: game.currentTetrimonio,
+      gameStarted: game.gameStarted,
       lastPlay: playerNumber,
       players: Enum.map(game.players, fn(p) -> get_player_client_view(p) end),
     }

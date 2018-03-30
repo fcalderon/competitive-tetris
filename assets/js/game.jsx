@@ -52,6 +52,7 @@ export class Game extends React.Component {
 
         return {
             game : {
+                gameStarted: game.gameStarted,
                 currentPlayersGame: currentPlayersGame,
                 opponentPlayersGame: opponentPlayersGame
             }
@@ -137,16 +138,22 @@ export class Game extends React.Component {
         return (<div className={'container mb-5'}>
             <div>
                 { !!this.state.game ?
-                    <div className={'row'}>
-                        <div className='col-8'>
-                            <h1>Your board</h1>
-                            {this._renderBoard(this.state.game.currentPlayersGame.visibleBoard)}
+                        this.state.game.gameStarted
+                        ?
+                        <div className={'row'}>
+                            <div className='col-8'>
+                                <h1>Your board</h1>
+                                {this._renderBoard(this.state.game.currentPlayersGame.visibleBoard)}
+                            </div>
+                            <div className='col-4'>
+                                <h1>Your oponents board</h1>
+                                {this._renderBoard(this.state.game.opponentPlayersGame.visibleBoard)}
+                            </div>
                         </div>
-                        <div className='col-4'>
-                            <h1>Your oponents board</h1>
-                            {this._renderBoard(this.state.game.opponentPlayersGame.visibleBoard)}
+                        :
+                        <div className={'row'}>
+                            <div className={'col'}><p>Game hasn't started. Waiting for second player.</p></div>
                         </div>
-                    </div>
                     :
                     <div>
                         <p>No game</p>
