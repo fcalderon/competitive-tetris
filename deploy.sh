@@ -34,7 +34,7 @@ fi
 
 mkdir -p ~/www/competitivetetris
 REL_TAR=~/src/competitive-tetris/_build/prod/rel/competitivetetris/releases/0.0.1/competitivetetris.tar.gz
-(cd ~/www/competitive-tetris && tar xzvf $REL_TAR)
+(cd ~/www/competitivetetris && tar xzvf $REL_TAR)
 
 crontab - <<CRONTAB
 @reboot bash /home/tetris/src/competitive-tetris/start.sh
