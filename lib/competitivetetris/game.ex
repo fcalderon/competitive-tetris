@@ -351,9 +351,9 @@ defmodule Competitivetetris.Game do
               currentTetrimonio: get_tetrimonio(player.tetrimonioLetter, rotationIndex)
             })
         {"soft_drop"} ->
-          IO.puts("Soft drop")
+          potentialPlayer = Map.put(updated, :topLeft, %{ row: player.topLeft.row + 2, col: player.topLeft.col })
         {"hard_drop"} ->
-          IO.puts("Hard drop")
+          potentialPlayer = Map.put(updated, :topLeft, %{ row: player.topLeft.row + 4, col: player.topLeft.col })
       end
       if (!will_collide(potentialPlayer, potentialPlayer.topLeft)) do
         potentialPlayer
