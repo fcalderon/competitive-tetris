@@ -192,7 +192,6 @@ defmodule Competitivetetris.Game do
   def new(playerNumber) do
     randomShape = get_random_tetrimonio_letter()
     shapeTetrimonio = get_tetrimonio(randomShape, 0)
-    IO.inspect(shapeTetrimonio)
     %{
       currentShape: randomShape,
       currentTetrimonio: shapeTetrimonio,
@@ -287,7 +286,6 @@ defmodule Competitivetetris.Game do
         tetrimonioLetter: newTetrimonioLetter,
         rotationIndex: 0
       })
-      IO.inspect(updated)
       updated
     else
       Map.put(updated, :topLeft, nextMove)
@@ -433,8 +431,26 @@ defmodule Competitivetetris.Game do
   def clear_completed_rows(board) do
     board
     |> get_completed_rows
-    |> clear_rows(board)
+    |> drop_rows(board)
   end
 
+  def drop_rows(rows, board) do
+    updatedBoard = board
+    rows
+    |> Enum.sort
+    |> Enum.reduce(updatedBoard,
+         fn(rowIndex, acc) ->
+         drop_row(rowIndex, acc)
+         end)
+  end
 
+  def drop_row(row, board) do
+    updated = board
+    updated = List.delete_at(updated, row)
+    Enum.concat([[0,0,0,0,0,0,0,0,0,0]], updated)
+  end
+
+  def has_floating_rows(board) do
+    true
+  end
 end
