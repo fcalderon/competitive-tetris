@@ -195,6 +195,7 @@ defmodule Competitivetetris.Game do
     shapeTetrimonio = get_tetrimonio(randomShape, 0)
     %{
       gameStarted: false,
+      gameEnded: false,
       players: [
         new_player(playerNumber)
       ],
@@ -247,7 +248,6 @@ defmodule Competitivetetris.Game do
                  -> cel_val(col, rowIndex, colIndex, topLeft, currentTetrimonio)
                  end)
          end)
-    visible
   end
 
   def cel_val(col, rowIndex, colIndex, topLeft, currentTetrimonio) do

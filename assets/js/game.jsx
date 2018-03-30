@@ -97,17 +97,23 @@ export class Game extends React.Component {
 
         return (<div className={'board'}> {board.map((row, index) => {
            return (
-               <div className={'row'} key={index}>
+                 (index === 0 || index === 1)
+                   ?
+                     <span></span>
+                   :
+                     <div className={'row'} key={index}>
 
-                   {row.map((col, colIndex) => {
-                       return (
-                           <div className={'col cell ' + this._cellClass(col)} key={colIndex}>
+                         {row.map((col, colIndex) => {
+                             return (
+                                 <div className={'col cell ' + this._cellClass(col)} key={colIndex}>
 
-                           </div>
-                       )
-                   })}
+                                 </div>
+                             )
+                         })}
 
-               </div>
+                     </div>
+
+
            )
         })}</div>);
     }
