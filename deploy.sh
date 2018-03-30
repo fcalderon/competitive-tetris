@@ -27,13 +27,13 @@ mkdir -p ~/www
 mkdir -p ~/old
 
 NOW=`date +%s`
-if [ -d ~/www/competitive-tetris ]; then
-	echo mv ~/www/competitive-tetris ~/old/$NOW
-	mv ~/www/competitive-tetris ~/old/$NOW
+if [ -d ~/www/competitivetetris ]; then
+	echo mv ~/www/competitivetetris ~/old/$NOW
+	mv ~/www/competitivetetris ~/old/$NOW
 fi
 
-mkdir -p ~/www/competitive-tetris
-REL_TAR=~/src/competitive-tetris/_build/prod/rel/competitive-tetris/releases/0.0.1/competitive-tetris.tar.gz
+mkdir -p ~/www/competitivetetris
+REL_TAR=~/src/competitive-tetris/_build/prod/rel/competitivetetris/releases/0.0.1/competitivetetris.tar.gz
 (cd ~/www/competitive-tetris && tar xzvf $REL_TAR)
 
 crontab - <<CRONTAB
